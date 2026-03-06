@@ -124,13 +124,30 @@
                                    referrer.includes('checkout.razorpay.com') ||
                                    referrer.includes('api.razorpay.com');
             
+            // After detecting valid payment (from referrer)
+            if (isFromRazorpay) {
+                // Show WhatsApp link immediately (already working)
+                document.getElementById('success').style.display = 'block';
+                
+                // Optional: Verify with webhook (for logging)
+                try {
+                    // You could store a session ID or use a generic call
+                    fetch('https://render-payment-webhook-production-c909.up.railway.app/health')
+                        .then(res => res.json())
+                        .then(data => console.log('Webhook healthy:', data));
+                } catch(e) {}
+            }
             // Display debug info
-            document.getElementById('debug-content').innerHTML = `
-                Referrer: ${referrer}<br>
-                From Razorpay: ${isFromRazorpay}<br>
-                Payment ID in URL: ${paymentId}<br>
-                URL: ${currentUrl.substring(0, 50)}...
-            `;
+            // Only update debug if element exists
+            const debugContent = document.getElementById('debug-content');
+            if (debugContent) {
+                debugContent.innerHTML = `
+                    Referrer: ${referrer}<br>
+                    From Razorpay: ${isFromRazorpay}<br>
+                    Payment ID in URL: ${paymentId}<br>
+                    URL: ${currentUrl.substring(0, 50)}...
+                `;
+            }
             
             console.log('🔍 Payment Status Page');
             console.log('Referrer:', referrer);
