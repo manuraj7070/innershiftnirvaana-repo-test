@@ -125,18 +125,47 @@
                                    referrer.includes('api.razorpay.com');
             
             // After detecting valid payment (from referrer)
-            if (isFromRazorpay) {
-                // Show WhatsApp link immediately (already working)
-                document.getElementById('success').style.display = 'block';
+// After detecting valid payment (from referrer)
+if (isFromRazorpay) {
+    // Show WhatsApp link immediately
+    document.getElementById('success').style.display = 'block';
+    
+    // Health check
+    fetch('https://render-payment-webhook-production-c909.up.railway.app/health')
+        .then(res => res.json())
+        .then(data => console.log('✅ Webhook healthy:', data));
+    
+    // 🔥 NEW: Fetch and log recent payments to see the payment ID
+    fetch('https://render-payment-webhook-production-c909.up.railway.app/api/recent-payments')
+        .then(res => res.json())
+        .then(data => {
+            console.log('📋 Recent payments from webhook:', data);
+            
+            if (data.payments && data.payments.length > 0) {
+                // Get the most recent payment
+                const latestPayment = data.payments[0];
+                console.log('💰 Latest payment ID:', latestPayment.paymentId);
+                console.log('📅 Payment time:', latestPayment.timestamp);
+                console.log('💵 Amount:', latestPayment.amount);
                 
-                // Optional: Verify with webhook (for logging)
-                try {
-                    // You could store a session ID or use a generic call
-                    fetch('https://render-payment-webhook-production-c909.up.railway.app/health')
-                        .then(res => res.json())
-                        .then(data => console.log('Webhook healthy:', data));
-                } catch(e) {}
+                // Store it in sessionStorage for later use
+                sessionStorage.setItem('latest_payment_id', latestPayment.paymentId);
+                sessionStorage.setItem('latest_payment_amount', latestPayment.amount);
+                
+                // Now you can also verify this specific payment
+                fetch(`https://render-payment-webhook-production-c909.up.railway.app/verify/${latestPayment.paymentId}`)
+                    .then(res => res.json())
+                    .then(verifyData => {
+                        if (verifyData.valid) {
+                            console.log('✅ Payment verified:', verifyData.details);
+                        }
+                    });
+            } else {
+                console.log('⚠️ No payments found in webhook');
             }
+        })
+        .catch(err => console.log('Failed to fetch recent payments:', err));
+}
             // Display debug info
             // Only update debug if element exists
             const debugContent = document.getElementById('debug-content');
