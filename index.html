@@ -147,6 +147,8 @@
                                    referrer.includes('checkout.razorpay.com') ||
                                    referrer.includes('api.razorpay.com');
             
+            console.log('referrer:', referrer);
+            console.log('From Razorpay:', isFromRazorpay);
             // After detecting valid payment (from referrer)
             // After detecting valid payment (from referrer)
             if (isFromRazorpay) {
