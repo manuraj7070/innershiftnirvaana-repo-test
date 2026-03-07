@@ -123,7 +123,9 @@
             const currentUrl = window.location.href;
             const urlParams = new URLSearchParams(window.location.search);
             const paymentId = urlParams.get('razorpay_payment_id') || urlParams.get('pid') || 'none';
-        
+            // Check if we have Payment Link ID in sessionStorage
+            const paymentLinkId = sessionStorage.getItem('razorpay_payment_link_id');
+
             // Check computed styles
             const debug = document.getElementById('debug');
             const styles = window.getComputedStyle(debug);
@@ -168,6 +170,28 @@
             console.log('Payment ID:', paymentId);
             
             // --- HELPER FUNCTIONS ---
+            function fetchPaymentFromPaymentPageId(){
+        
+
+                // Check if we have Payment Page ID in sessionStorage
+                // (This would need to be stored on the payment page - see below)
+                const paymentPageId = sessionStorage.getItem('razorpay_payment_page_id');
+                
+                if (paymentPageId) {
+                    console.log('🔍 Found Payment Page ID:', paymentPageId);
+                    
+                    fetch(`https://render-payment-webhook-production-c909.up.railway.app/api/payment-by-page/${paymentPageId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById('payment-id-display').textContent = data.paymentId;
+                                document.getElementById('success').style.display = 'block';
+                                document.getElementById('processing').style.display = 'none';
+                            }
+                        });
+                }
+        
+            }
             
             function fetchPaymentFromUserAgent() {
                 console.log('🔍 Looking up payment by browser fingerprint...');
@@ -191,7 +215,7 @@
                     } else {
                         console.log('⏳ No payment found yet, retrying...');
                         // Try again in 2 seconds WITHOUT reloading
-                        setTimeout(fetchPaymentFromUserAgent, 2000);
+                        //setTimeout(fetchPaymentFromUserAgent, 2000);
                     }
                 })
                 .catch(err => {
@@ -246,7 +270,8 @@
                     document.getElementById('success').style.display = 'block';
                     
                     // Try all methods to get payment ID
-                    fetchPaymentFromUserAgent();
+                    //fetchPaymentFromUserAgent();
+                    fetchPaymentFromPaymentPageId();
                     fetchRecentPayment();
                     
                     console.log('✅ WhatsApp link shown - valid payment from referrer');
