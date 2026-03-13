@@ -472,7 +472,7 @@
     </div>
 
     <script>
-        // Configuration
+        // Configuration - ONLY public URLs, NO sensitive data
         const API_BASE_URL = 'https://render-payment-webhook-production-c909.up.railway.app';
         const GITHUB_PAGES_URL = 'https://innershiftnirvaana.github.io/innershiftnirvaana-repo';
         
@@ -497,6 +497,7 @@
         // State
         let paymentData = null;
         let realWhatsAppLink = '';
+        let verificationInProgress = false;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -507,11 +508,20 @@
                 return;
             }
             
+            // Check if this code was already used in this session
+            if (sessionStorage.getItem(`used_${accessCode}`)) {
+                showUsed();
+                return;
+            }
+            
             verifyAccessCode(accessCode);
         });
         
         // Verify access code with backend
         async function verifyAccessCode(code) {
+            if (verificationInProgress) return;
+            verificationInProgress = true;
+            
             try {
                 // First check localStorage fallback (for development/backup)
                 const localData = localStorage.getItem(`access_${code}`);
@@ -522,10 +532,14 @@
                     
                     if (data.used) {
                         showUsed();
+                        verificationInProgress = false;
                         return;
                     }
                     
-                    // Mark as used
+                    // Mark as used in this session
+                    sessionStorage.setItem(`used_${code}`, 'true');
+                    
+                    // Mark as used in localStorage
                     data.used = true;
                     localStorage.setItem(`access_${code}`, JSON.stringify(data));
                     
@@ -534,21 +548,32 @@
                         customerName: data.customerData.fullname,
                         customerEmail: data.customerData.email,
                         customerPhone: data.customerData.phone,
-                        amount: 5100,
+                        amount: data.amount || 5100,
                         timestamp: data.createdAt
                     };
                     
                     realWhatsAppLink = data.whatsappLink;
                     showSuccess();
+                    verificationInProgress = false;
                     return;
                 }
                 
                 // Try backend verification
-                const response = await fetch(`${API_BASE_URL}/api/verify-access-code`, {
+                const response = await fetch(`${API_BASE_URL}/api/verify-access`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessCode: code })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ 
+                        code: code,
+                        timestamp: new Date().toISOString()
+                    })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -557,8 +582,12 @@
                     
                     if (data.used) {
                         showUsed();
+                        verificationInProgress = false;
                         return;
                     }
+                    
+                    // Mark as used in this session
+                    sessionStorage.setItem(`used_${code}`, 'true');
                     
                     paymentData = {
                         paymentId: data.paymentId,
@@ -571,7 +600,7 @@
                     
                     realWhatsAppLink = data.whatsappLink;
                     
-                    // Mark as used
+                    // Mark as used on backend
                     await markCodeAsUsed(code);
                     
                     showSuccess();
@@ -581,21 +610,30 @@
                 }
             } catch (error) {
                 console.error('❌ Verification error:', error);
-                
-                // Fallback: Try to generate a new code if this is a valid payment?
-                // This is a safety net - in production, you'd want proper error handling
                 showError('Unable to verify access. Please try again or contact support.');
+            } finally {
+                verificationInProgress = false;
             }
         }
         
         // Mark access code as used
         async function markCodeAsUsed(code) {
             try {
-                await fetch(`${API_BASE_URL}/api/mark-code-used`, {
+                const response = await fetch(`${API_BASE_URL}/api/mark-code-used`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessCode: code })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ 
+                        code: code,
+                        timestamp: new Date().toISOString()
+                    })
                 });
+                
+                if (!response.ok) {
+                    console.warn('⚠️ Failed to mark code as used on backend');
+                }
             } catch (error) {
                 console.error('❌ Error marking code as used:', error);
                 // Non-critical error - user can still proceed
@@ -617,27 +655,30 @@
                 minute: '2-digit'
             });
             
+            // Format amount
+            const amount = paymentData.amount ? (paymentData.amount / 100).toFixed(2) : '51.00';
+            
             // Display payment details
             paymentDetailsContent.innerHTML = `
                 <div class="detail-row">
                     <span class="detail-label">Payment ID:</span>
-                    <span class="detail-value">${paymentData.paymentId}</span>
+                    <span class="detail-value">${paymentData.paymentId || 'N/A'}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Name:</span>
-                    <span class="detail-value">${paymentData.customerName}</span>
+                    <span class="detail-value">${paymentData.customerName || 'N/A'}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Email:</span>
-                    <span class="detail-value">${paymentData.customerEmail}</span>
+                    <span class="detail-value">${paymentData.customerEmail || 'N/A'}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Phone:</span>
-                    <span class="detail-value">${paymentData.customerPhone}</span>
+                    <span class="detail-value">${paymentData.customerPhone || 'N/A'}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Amount:</span>
-                    <span class="detail-value">₹${(paymentData.amount / 100).toFixed(2)}</span>
+                    <span class="detail-value">₹${amount}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Date:</span>
@@ -646,14 +687,26 @@
             `;
             
             // Display Payment ID for member tag
-            paymentIdDisplay.textContent = `Payment ID: ${paymentData.paymentId}`;
-            paymentIdForTag.textContent = paymentData.paymentId;
+            const displayPaymentId = paymentData.paymentId || 'N/A';
+            paymentIdDisplay.textContent = `Payment ID: ${displayPaymentId}`;
+            paymentIdForTag.textContent = displayPaymentId;
             
             // Set WhatsApp button link
-            whatsappBtn.href = realWhatsAppLink;
+            if (realWhatsAppLink) {
+                whatsappBtn.href = realWhatsAppLink;
+            } else {
+                whatsappBtn.style.opacity = '0.5';
+                whatsappBtn.style.pointerEvents = 'none';
+                whatsappBtn.textContent = '❌ Link Temporarily Unavailable';
+            }
             
             // Add click tracking
-            whatsappBtn.addEventListener('click', function() {
+            whatsappBtn.addEventListener('click', function(e) {
+                if (!realWhatsAppLink) {
+                    e.preventDefault();
+                    alert('Join link is temporarily unavailable. Please try again later.');
+                    return;
+                }
                 console.log('📱 WhatsApp link clicked for payment:', paymentData.paymentId);
                 trackJoin(paymentData.paymentId);
             });
@@ -678,14 +731,24 @@
         // Track when user clicks join
         async function trackJoin(paymentId) {
             try {
-                await fetch(`${API_BASE_URL}/api/track-join`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        paymentId: paymentId,
-                        timestamp: new Date().toISOString()
-                    })
+                // Use sendBeacon for analytics - doesn't block page unload
+                const data = JSON.stringify({ 
+                    paymentId: paymentId,
+                    event: 'whatsapp_click',
+                    timestamp: new Date().toISOString()
                 });
+                
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(`${API_BASE_URL}/api/track-event`, data);
+                } else {
+                    // Fallback to fetch
+                    fetch(`${API_BASE_URL}/api/track-event`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: data,
+                        keepalive: true
+                    }).catch(() => {});
+                }
             } catch (error) {
                 console.error('❌ Error tracking join:', error);
             }
@@ -693,15 +756,33 @@
         
         // Copy link to clipboard
         copyLinkBtn.addEventListener('click', function() {
+            if (!realWhatsAppLink) {
+                alert('No link available to copy');
+                return;
+            }
+            
             navigator.clipboard.writeText(realWhatsAppLink).then(() => {
                 // Show temporary success message
                 const originalText = copyLinkBtn.textContent;
                 copyLinkBtn.textContent = '✅ Copied!';
+                copyLinkBtn.style.background = '#28a745';
+                copyLinkBtn.style.color = 'white';
+                
                 setTimeout(() => {
                     copyLinkBtn.textContent = originalText;
+                    copyLinkBtn.style.background = '#f8f9fa';
+                    copyLinkBtn.style.color = '#333';
                 }, 2000);
             }).catch(() => {
-                alert('Failed to copy link. Please select and copy manually.');
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = realWhatsAppLink;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                alert('Link copied to clipboard!');
             });
         });
         
@@ -712,6 +793,11 @@
         
         // Set expiry countdown
         function setExpiryCountdown() {
+            if (!paymentData || !paymentData.timestamp) {
+                expiryCountdown.textContent = '7 days';
+                return;
+            }
+            
             const createdDate = new Date(paymentData.timestamp);
             const expiryDate = new Date(createdDate);
             expiryDate.setDate(expiryDate.getDate() + 7); // 7 days validity
@@ -743,19 +829,45 @@
         
         // Handle browser back/forward
         window.addEventListener('popstate', function() {
-            // If they try to go back to this page after using it, show used state
-            if (paymentData) {
+            // If they try to go back to this page after using it, check if code was used
+            if (accessCode && sessionStorage.getItem(`used_${accessCode}`)) {
                 showUsed();
             }
         });
         
         // Prevent double-click on WhatsApp button
+        let clicked = false;
         whatsappBtn.addEventListener('click', function(e) {
-            if (whatsappBtn.classList.contains('used')) {
+            if (clicked) {
                 e.preventDefault();
-                alert('This link has already been used. Please contact support if you need to rejoin.');
+                alert('Please wait a moment before clicking again.');
+                return;
             }
-            whatsappBtn.classList.add('used');
+            
+            clicked = true;
+            setTimeout(() => {
+                clicked = false;
+            }, 3000);
+        });
+        
+        // Add retry mechanism for failed loads
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        function retryVerification() {
+            if (retryCount < maxRetries) {
+                retryCount++;
+                console.log(`🔄 Retry attempt ${retryCount}/${maxRetries}`);
+                setTimeout(() => verifyAccessCode(accessCode), 2000 * retryCount);
+            }
+        }
+        
+        // Handle network errors
+        window.addEventListener('online', function() {
+            if (loadingState && !loadingState.classList.contains('hidden')) {
+                console.log('📶 Network restored, retrying verification...');
+                retryVerification();
+            }
         });
     </script>
 </body>
