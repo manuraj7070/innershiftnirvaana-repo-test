@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Verified - Addiction Healing Workshop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.5s ease;
+        }
+        
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.5s ease;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .payment-details {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .payment-details h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .whatsapp-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            text-align: center;
+            margin: 25px 0 15px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .whatsapp-button:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+        }
+        
+        .whatsapp-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .whatsapp-button i {
+            margin-right: 10px;
+        }
+        
+        .tag-instructions {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .tag-instructions h4 {
+            color: #1976D2;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .tag-instructions ol {
+            margin-left: 20px;
+            color: #333;
+        }
+        
+        .tag-instructions li {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        
+        .payment-id-highlight {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 16px;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px dashed #2196F3;
+            color: #1976D2;
+            font-weight: bold;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .expiry-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .expiry-info i {
+            color: #dc3545;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .secondary-button {
+            flex: 1;
+            padding: 12px;
+            background: #f8f9fa;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        
+        .secondary-button:hover {
+            background: #e9ecef;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .countdown {
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+            .card {
+                box-shadow: none;
+            }
+            .whatsapp-button, .secondary-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Addiction Healing Workshop</h1>
+                <div class="subtitle">Access Verification</div>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loading-state" class="status-box">
+                <div class="loader"></div>
+                <p style="color: #666; margin-top: 20px;">Verifying your access code...</p>
+                <p style="color: #999; font-size: 14px; margin-top: 10px;">Please wait while we validate your payment</p>
+            </div>
+            
+            <!-- Success State -->
+            <div id="success-state" class="status-box hidden fade-in">
+                <div class="success-icon">✓</div>
+                <h2 style="color: #28a745; margin-bottom: 10px;">Access Verified!</h2>
+                <p style="color: #666;">Your payment has been confirmed</p>
+                
+                <!-- Payment Details -->
+                <div id="payment-details-container" class="payment-details">
+                    <h3>Payment Information</h3>
+                    <div id="payment-details-content"></div>
+                </div>
+                
+                <!-- Payment ID Highlight for Member Tag -->
+                <div class="payment-id-highlight" id="payment-id-display"></div>
+                
+                <!-- WhatsApp Join Button -->
+                <a href="#" id="whatsapp-join-btn" class="whatsapp-button" target="_blank">
+                    <i>📱</i> Click to Join WhatsApp Group
+                </a>
+                
+                <!-- Member Tag Instructions -->
+                <div class="tag-instructions">
+                    <h4>📌 IMPORTANT: Set Your Member Tag</h4>
+                    <p>After joining the group, please set your Payment ID as your member tag:</p>
+                    <ol>
+                        <li>Open the WhatsApp group you just joined</li>
+                        <li>Tap the <strong>group name</strong> at the top</li>
+                        <li>Scroll down to <strong>"You"</strong> in the members list</li>
+                        <li>Tap <strong>"Add member tag"</strong></li>
+                        <li>Enter the Payment ID shown above: <strong id="payment-id-for-tag"></strong></li>
+                        <li>Tap <strong>"Save"</strong></li>
+                    </ol>
+                    <p style="margin-top: 15px; color: #1976D2; font-weight: 500;">✅ This verifies your membership and helps us keep the community secure!</p>
+                </div>
+                
+                <!-- Expiry Warning -->
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> This link will expire in <span id="expiry-countdown">7 days</span> and can only be used once.
+                    Please save the group after joining.
+                </div>
+                
+                <!-- Button Group -->
+                <div class="button-group">
+                    <button class="secondary-button" id="copy-link-btn">📋 Copy Join Link</button>
+                    <button class="secondary-button" id="print-details-btn">🖨️ Save Details</button>
+                </div>
+            </div>
+            
+            <!-- Error State -->
+            <div id="error-state" class="status-box hidden fade-in">
+                <div class="error-icon">✗</div>
+                <h2 style="color: #dc3545; margin-bottom: 10px;">Access Denied</h2>
+                <p id="error-message" style="color: #666; margin-bottom: 20px;">Invalid or expired access code</p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p style="margin-bottom: 15px;">Possible reasons:</p>
+                    <ul style="list-style: none; text-align: left;">
+                        <li style="margin: 10px 0;">• Link has already been used</li>
+                        <li style="margin: 10px 0;">• Link has expired (valid for 7 days)</li>
+                        <li style="margin: 10px 0;">• Invalid access code</li>
+                        <li style="margin: 10px 0;">• Payment not completed</li>
+                    </ul>
+                </div>
+                
+                <a href="https://innershiftnirvaana.github.io/innershiftnirvaana-repo" class="whatsapp-button" style="background: #667eea;">
+                    🔙 Return to Registration
+                </a>
+                
+                <p style="margin-top: 20px; font-size: 14px; color: #999;">
+                    If you believe this is an error, please contact support with your payment ID
+                </p>
+            </div>
+            
+            <!-- Already Used State -->
+            <div id="used-state" class="status-box hidden fade-in">
+                <div class="error-icon" style="background: #ffc107;">!</div>
+                <h2 style="color: #856404; margin-bottom: 10px;">Link Already Used</h2>
+                <p style="color: #666; margin-bottom: 20px;">This access link has already been used</p>
+                
+                <div class="warning-box">
+                    <strong>🔒 Security Notice:</strong> For your security, each access link can only be used once.
+                    If you need to access the group again, please contact support.
+                </div>
+                
+                <a href="https://innershiftnirvaana.github.io/innershiftnirvaana-repo" class="whatsapp-button" style="background: #667eea;">
+                    🔙 Return to Registration
+                </a>
+            </div>
+            
+            <div class="footer">
+                <p>© 2024 Inner Shift Nirvaana. All rights reserved.</p>
+                <p style="margin-top: 5px;">
+                    <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact Support</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://render-payment-webhook-production-c909.up.railway.app';
+        const GITHUB_PAGES_URL = 'https://innershiftnirvaana.github.io/innershiftnirvaana-repo';
+        
+        // Get access code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessCode = urlParams.get('code');
+        
+        // DOM Elements
+        const loadingState = document.getElementById('loading-state');
+        const successState = document.getElementById('success-state');
+        const errorState = document.getElementById('error-state');
+        const usedState = document.getElementById('used-state');
+        const errorMessage = document.getElementById('error-message');
+        const whatsappBtn = document.getElementById('whatsapp-join-btn');
+        const paymentIdDisplay = document.getElementById('payment-id-display');
+        const paymentIdForTag = document.getElementById('payment-id-for-tag');
+        const paymentDetailsContent = document.getElementById('payment-details-content');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+        const printDetailsBtn = document.getElementById('print-details-btn');
+        const expiryCountdown = document.getElementById('expiry-countdown');
+        
+        // State
+        let paymentData = null;
+        let realWhatsAppLink = '';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Access page loaded with code:', accessCode);
+            
+            if (!accessCode) {
+                showError('No access code provided');
+                return;
+            }
+            
+            verifyAccessCode(accessCode);
+        });
+        
+        // Verify access code with backend
+        async function verifyAccessCode(code) {
+            try {
+                // First check localStorage fallback (for development/backup)
+                const localData = localStorage.getItem(`access_${code}`);
+                
+                if (localData) {
+                    console.log('📦 Found local access data');
+                    const data = JSON.parse(localData);
+                    
+                    if (data.used) {
+                        showUsed();
+                        return;
+                    }
+                    
+                    // Mark as used
+                    data.used = true;
+                    localStorage.setItem(`access_${code}`, JSON.stringify(data));
+                    
+                    paymentData = {
+                        paymentId: data.paymentId,
+                        customerName: data.customerData.fullname,
+                        customerEmail: data.customerData.email,
+                        customerPhone: data.customerData.phone,
+                        amount: 5100,
+                        timestamp: data.createdAt
+                    };
+                    
+                    realWhatsAppLink = data.whatsappLink;
+                    showSuccess();
+                    return;
+                }
+                
+                // Try backend verification
+                const response = await fetch(`${API_BASE_URL}/api/verify-access-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessCode: code })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ Access code verified');
+                    
+                    if (data.used) {
+                        showUsed();
+                        return;
+                    }
+                    
+                    paymentData = {
+                        paymentId: data.paymentId,
+                        customerName: data.customerName,
+                        customerEmail: data.customerEmail,
+                        customerPhone: data.customerPhone,
+                        amount: data.amount,
+                        timestamp: data.createdAt
+                    };
+                    
+                    realWhatsAppLink = data.whatsappLink;
+                    
+                    // Mark as used
+                    await markCodeAsUsed(code);
+                    
+                    showSuccess();
+                } else {
+                    console.log('❌ Invalid access code');
+                    showError(data.message || 'Invalid access code');
+                }
+            } catch (error) {
+                console.error('❌ Verification error:', error);
+                
+                // Fallback: Try to generate a new code if this is a valid payment?
+                // This is a safety net - in production, you'd want proper error handling
+                showError('Unable to verify access. Please try again or contact support.');
+            }
+        }
+        
+        // Mark access code as used
+        async function markCodeAsUsed(code) {
+            try {
+                await fetch(`${API_BASE_URL}/api/mark-code-used`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessCode: code })
+                });
+            } catch (error) {
+                console.error('❌ Error marking code as used:', error);
+                // Non-critical error - user can still proceed
+            }
+        }
+        
+        // Show success state
+        function showSuccess() {
+            loadingState.classList.add('hidden');
+            successState.classList.remove('hidden');
+            
+            // Format date
+            const date = new Date(paymentData.timestamp);
+            const formattedDate = date.toLocaleString('en-IN', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Display payment details
+            paymentDetailsContent.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Payment ID:</span>
+                    <span class="detail-value">${paymentData.paymentId}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value">${paymentData.customerName}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value">${paymentData.customerEmail}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value">${paymentData.customerPhone}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value">₹${(paymentData.amount / 100).toFixed(2)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value">${formattedDate}</span>
+                </div>
+            `;
+            
+            // Display Payment ID for member tag
+            paymentIdDisplay.textContent = `Payment ID: ${paymentData.paymentId}`;
+            paymentIdForTag.textContent = paymentData.paymentId;
+            
+            // Set WhatsApp button link
+            whatsappBtn.href = realWhatsAppLink;
+            
+            // Add click tracking
+            whatsappBtn.addEventListener('click', function() {
+                console.log('📱 WhatsApp link clicked for payment:', paymentData.paymentId);
+                trackJoin(paymentData.paymentId);
+            });
+            
+            // Set expiry countdown
+            setExpiryCountdown();
+        }
+        
+        // Show error state
+        function showError(message) {
+            loadingState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            errorMessage.textContent = message || 'Invalid or expired access code';
+        }
+        
+        // Show used state
+        function showUsed() {
+            loadingState.classList.add('hidden');
+            usedState.classList.remove('hidden');
+        }
+        
+        // Track when user clicks join
+        async function trackJoin(paymentId) {
+            try {
+                await fetch(`${API_BASE_URL}/api/track-join`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        paymentId: paymentId,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch (error) {
+                console.error('❌ Error tracking join:', error);
+            }
+        }
+        
+        // Copy link to clipboard
+        copyLinkBtn.addEventListener('click', function() {
+            navigator.clipboard.writeText(realWhatsAppLink).then(() => {
+                // Show temporary success message
+                const originalText = copyLinkBtn.textContent;
+                copyLinkBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyLinkBtn.textContent = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy link. Please select and copy manually.');
+            });
+        });
+        
+        // Print/Save details
+        printDetailsBtn.addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Set expiry countdown
+        function setExpiryCountdown() {
+            const createdDate = new Date(paymentData.timestamp);
+            const expiryDate = new Date(createdDate);
+            expiryDate.setDate(expiryDate.getDate() + 7); // 7 days validity
+            
+            const now = new Date();
+            const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+            
+            if (daysLeft > 0) {
+                expiryCountdown.textContent = `${daysLeft} day${daysLeft !== 1 ? 's' : ''}`;
+            } else {
+                expiryCountdown.textContent = 'expired';
+                expiryCountdown.style.color = '#dc3545';
+            }
+        }
+        
+        // Auto-redirect after 5 minutes for security
+        let timeout = setTimeout(() => {
+            if (!successState.classList.contains('hidden')) {
+                // Don't auto-redirect if on success page - let user finish
+                return;
+            }
+            window.location.href = GITHUB_PAGES_URL;
+        }, 300000); // 5 minutes
+        
+        // Clear timeout if user interacts
+        document.addEventListener('click', () => {
+            clearTimeout(timeout);
+        });
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', function() {
+            // If they try to go back to this page after using it, show used state
+            if (paymentData) {
+                showUsed();
+            }
+        });
+        
+        // Prevent double-click on WhatsApp button
+        whatsappBtn.addEventListener('click', function(e) {
+            if (whatsappBtn.classList.contains('used')) {
+                e.preventDefault();
+                alert('This link has already been used. Please contact support if you need to rejoin.');
+            }
+            whatsappBtn.classList.add('used');
+        });
+    </script>
+</body>
+</html>
