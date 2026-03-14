@@ -784,7 +784,8 @@ function sanitizeCustomerData(fullname, email, phone) {
 
         async function handlePayment() {
             console.log('💰 Payment button clicked');
-            
+            console.log('Pay button element:', document.getElementById('pay-button'));
+                       
             let fullname = document.getElementById('fullname').value.trim();
             let email = document.getElementById('email').value.trim();
             let phone = document.getElementById('phone').value.trim();       
