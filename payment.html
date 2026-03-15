@@ -1032,6 +1032,7 @@ document.cookie.split(";").forEach(function(c) {
                 // 1. ONE API CALL to get everything
                 const response = await fetch(`${API_BASE_URL}/api/get-checkout-options?_t=${Date.now()}`, {
                     method: 'POST',
+                    credentials: 'include',  // Add this
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         amount: 51,
@@ -1121,6 +1122,7 @@ document.cookie.split(";").forEach(function(c) {
                 // Save payment details to backend
                 await fetch(`${API_BASE_URL}/api/save-payment-details`, {
                     method: 'POST',
+                    credentials: 'include',  // Add this
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -1139,6 +1141,7 @@ document.cookie.split(";").forEach(function(c) {
                 // Verify payment on backend
                 const verifyResponse = await fetch(`${API_BASE_URL}/api/verify-payment`, {
                     method: 'POST',
+                    credentials: 'include',  // Add this
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -1206,6 +1209,7 @@ document.cookie.split(";").forEach(function(c) {
                 // Fetch payment details
                 const response = await fetch(`${API_BASE_URL}/api/get-payment-details`, {
                     method: 'POST',
+                    credentials: 'include',  // Add this
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId })
                 });
@@ -1304,6 +1308,7 @@ async function verifyWithRazorpay() {
         
         const response = await fetch(`${API_BASE_URL}/api/razorpay-verify-payment`, {
             method: 'POST',
+            credentials: 'include',  // Add this
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 paymentId,
@@ -1550,6 +1555,7 @@ document.getElementById('razorpay-result').style.border = '5px solid red';
             try {
                 const response = await fetch(`${API_BASE_URL}/api/razorpay-payment-status`, {
                     method: 'POST',
+                    credentials: 'include',  // Add this
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId })
                 });
